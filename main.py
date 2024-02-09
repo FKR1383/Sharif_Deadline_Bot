@@ -20,17 +20,17 @@ async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def handle_response(text: str) -> str:
     text = text.lower()
     if 'hello' in text:
-        return 'Hey Bitch!'
+        return 'Hey'
     if 'bye' in text:
-        return 'Bye Bitch'
+        return 'Bye'
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
-    text: str =  update.message.text
+    text: str = update.message.text
 
     print(f'User ({update.message.chat.id}) in {message_type}: "{text}"')
 
-    if message_type == 'group':
+    if message_type == 'private':
         if BOT_USERNAME in text:
             new_text: str = text.replace(BOT_USERNAME, '')
             response: str = handle_response(new_text)
