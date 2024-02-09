@@ -1,6 +1,7 @@
 from typing import Final
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from mysql.connector import connect, Error
 
 TOKEN: Final = '6898166331:AAE3SxcJjYu01NCsbvlZHs9Gzkcj7RQmM80'
 BOT_USERNAME: Final = '@Sharif_Deadline_bot'
@@ -42,8 +43,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} caused error {context.error}')
 
+def connect_to_database():
+    try:
+        with connect(
+                host="localhost",
+                user="admin",
+                password="admin00",
+        ) as connection:
+            print(connection)
+    except Error as e:
+        print(e)
+
+
 
 if __name__ == "__main__":
+    connect_to_database()
     print('Starting bot...')
     app = Application.builder().token(TOKEN).build()
 
