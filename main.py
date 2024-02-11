@@ -1,10 +1,16 @@
 from typing import Final
 from telegram import Update
+from threading import Thread
+import telegram
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from mysql.connector import connect, Error
+import schedule
+from time import sleep
+from datetime import datetime
 
 
 BOT_USERNAME: Final = '@Sharif_Deadline_bot'
+
 
 async def add_user_to_database(update: Update):
     try:
@@ -12,14 +18,23 @@ async def add_user_to_database(update: Update):
                                              database='sharif_deadline_database',
                                              user='admin',
                                              password='admin00')
-        mySql_insert_query = f"""INSERT INTO users (user_id, username) 
-                               VALUES 
-                               ({update.message.chat.id}, '{update.message.chat.username}') """
+
+        sql_select_Query = f"SELECT * FROM users WHERE users.user_id = {update.message.chat.id} and users.username= '{update.message.chat.username}'"
         cursor = connection.cursor()
-        cursor.execute(mySql_insert_query)
-        connection.commit()
-        print(cursor.rowcount, "User added!")
-        cursor.close()
+        cursor.execute(sql_select_Query)
+        records = cursor.fetchall()
+        if cursor.rowcount == 0:
+            mySql_insert_query = f"""INSERT INTO users (user_id, username) 
+                               VALUES 
+                                   ({update.message.chat.id}, '{update.message.chat.username}') """
+            cursor = connection.cursor()
+            cursor.execute(mySql_insert_query)
+            connection.commit()
+            print(cursor.rowcount, "User added!")
+            cursor.close()
+        else:
+            print('old user!')
+            cursor.close()
 
     except Error as error:
         print("Failed to insert record into Laptop table {}".format(error))
@@ -220,12 +235,21 @@ async def my_courses_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
             cursor.close()
             print("MySQL connection is closed")
 
+def say_hello_world():
+    while True:
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        if current_time == "13:31:50":
+            print('ttttt')
+        schedule.run_pending()
+        sleep(1)
+
+
 
 if __name__ == "__main__":
     connect_to_database()
     print('Starting bot...')
     app = Application.builder().token(TOKEN).build()
-
     #Commands
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command))
